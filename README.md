@@ -8,6 +8,8 @@ Location names match traffic flow data
 
 Locations contain subfolders A and B if they have more than one monitoring location in a single indoor location.
 
+Note: Times may be 1 hour off due to time diff.
+
 ## Outdoor Air quality
 
 Todo, get from BEACONN
