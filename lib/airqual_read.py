@@ -3,14 +3,18 @@
 from . import constants
 import pandas as pd
 
-def hourly_airqual(location: str, lag: int) -> list[pd.DataFrame]:
+def hourly_airqual(location: str, lag: int=-1) -> list[pd.DataFrame]:
     """Reads in air quality csvs from given location, takes non-overlapping 1-hour averages of readings, returns a list of dataframes.
     
     Parameters
     -------
     location: str
         A geographical location code that matches filename. See ./README.md
-    
+
+    lag: int <Optional, default=-1>
+        Apply lag of n hours to the time series. Useful when trying to correlate air quality
+        with other data. Default brings the time series to the correct UTC time (as sensors
+        programmed to report Europe/Madrid time).
 
     Returns
     -------
@@ -35,7 +39,7 @@ def hourly_airqual(location: str, lag: int) -> list[pd.DataFrame]:
             df = pd.concat([df,temp_df])        
             
         # Need to knock an hour off because sensors are set to Europe/Madrid time, which at time of data collection is 1 hour ahead
-        df.index = df.index - pd.Timedelta(hours=lag)
+        df.index = df.index + pd.Timedelta(hours=lag)
         df.sort_index() # sort by time to be safe
         df.index.names = ["DateTime"]
 
