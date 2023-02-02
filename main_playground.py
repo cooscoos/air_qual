@@ -4,6 +4,7 @@ from lib import constants
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
+import seaborn as sns
 # First let's read in the air quality data, then downsample it to 1 hour non-overlapping bins just like the traffic data
 
 #location = "7a41"
@@ -23,7 +24,10 @@ df = pd.concat([df,traffic_df],axis=1)
 df["M_count"] = df["M0_count"] + df["M1_count"]
 
 # Correlate variables shows that PM_25 has a weak/moderate relationship with traffic flow
-df.corr()
+
+corr = df.corr()
+corr
+sns.heatmap(corr, cmap="magma",annot=True)
 
 # Let's plot the time series
 fig,ax = plt.subplots()

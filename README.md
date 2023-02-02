@@ -7,6 +7,7 @@ from lib import constants
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
+import seaborn as sns
 
 location = "1b14"
 ```
@@ -81,440 +82,57 @@ print(df)
     [168 rows x 18 columns]
 
 
-We'll approach this naively and try and see which variables correlate strongly with each other. Doing this shows that PM_25 (PM 2.5) has a weak/moderate correlation of about 0.4 with total motorway traffic flow.
+We'll approach this naively and try and see which variables correlate strongly with each other. Doing this shows that:
+- particulate matter (PM_1, P_25, PM_10) shows reasonably hot colours against motorway traffic in a correlation heat map;
+- of all indoor environmental quality variables, PM_25 and PM_10 (PM 2.5) have the strongest correlation with motorway traffic;
+- the correlation coefficient is weak/moderate with a correlation of about 0.4.
 
 
 ```python
-print(df.corr())
+corr = df.corr()
+sns.heatmap(corr, cmap="magma",annot=False)
 ```
 
 
 
 
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>TEMP</th>
-      <th>HUM</th>
-      <th>BATT</th>
-      <th>LIGHT</th>
-      <th>NOISE_A</th>
-      <th>PRESS</th>
-      <th>CCS811_VOCS</th>
-      <th>CCS811_ECO2</th>
-      <th>SCD30_CO2</th>
-      <th>SCD30_TEMP</th>
-      <th>SCD30_HUM</th>
-      <th>PM_1</th>
-      <th>PM_25</th>
-      <th>PM_10</th>
-      <th>day</th>
-      <th>M0_count</th>
-      <th>M1_count</th>
-      <th>M_count</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>TEMP</th>
-      <td>1.000000</td>
-      <td>0.348004</td>
-      <td>-0.215066</td>
-      <td>-0.048114</td>
-      <td>0.277731</td>
-      <td>-0.216997</td>
-      <td>0.192807</td>
-      <td>0.274876</td>
-      <td>0.361620</td>
-      <td>0.982783</td>
-      <td>0.380277</td>
-      <td>0.117268</td>
-      <td>0.073169</td>
-      <td>0.062629</td>
-      <td>-0.271903</td>
-      <td>-0.109794</td>
-      <td>-0.075218</td>
-      <td>-0.091142</td>
-    </tr>
-    <tr>
-      <th>HUM</th>
-      <td>0.348004</td>
-      <td>1.000000</td>
-      <td>0.127964</td>
-      <td>-0.219791</td>
-      <td>0.590367</td>
-      <td>-0.200685</td>
-      <td>0.784337</td>
-      <td>0.865434</td>
-      <td>0.931950</td>
-      <td>0.438683</td>
-      <td>0.996366</td>
-      <td>-0.149658</td>
-      <td>-0.176525</td>
-      <td>-0.175673</td>
-      <td>0.042550</td>
-      <td>-0.735108</td>
-      <td>-0.703678</td>
-      <td>-0.720243</td>
-    </tr>
-    <tr>
-      <th>BATT</th>
-      <td>-0.215066</td>
-      <td>0.127964</td>
-      <td>1.000000</td>
-      <td>0.259032</td>
-      <td>-0.035350</td>
-      <td>-0.352320</td>
-      <td>0.227877</td>
-      <td>0.241680</td>
-      <td>0.173005</td>
-      <td>-0.116293</td>
-      <td>0.118250</td>
-      <td>-0.006917</td>
-      <td>0.006553</td>
-      <td>0.005445</td>
-      <td>0.546151</td>
-      <td>-0.116389</td>
-      <td>-0.082649</td>
-      <td>-0.098218</td>
-    </tr>
-    <tr>
-      <th>LIGHT</th>
-      <td>-0.048114</td>
-      <td>-0.219791</td>
-      <td>0.259032</td>
-      <td>1.000000</td>
-      <td>-0.242790</td>
-      <td>-0.016363</td>
-      <td>-0.095234</td>
-      <td>-0.032832</td>
-      <td>-0.217748</td>
-      <td>-0.032856</td>
-      <td>-0.213316</td>
-      <td>0.399301</td>
-      <td>0.382452</td>
-      <td>0.381544</td>
-      <td>0.143201</td>
-      <td>0.172480</td>
-      <td>0.203348</td>
-      <td>0.190021</td>
-    </tr>
-    <tr>
-      <th>NOISE_A</th>
-      <td>0.277731</td>
-      <td>0.590367</td>
-      <td>-0.035350</td>
-      <td>-0.242790</td>
-      <td>1.000000</td>
-      <td>-0.094918</td>
-      <td>0.436473</td>
-      <td>0.501627</td>
-      <td>0.705279</td>
-      <td>0.344176</td>
-      <td>0.559487</td>
-      <td>-0.225660</td>
-      <td>-0.297031</td>
-      <td>-0.311816</td>
-      <td>0.013444</td>
-      <td>-0.666472</td>
-      <td>-0.659078</td>
-      <td>-0.664599</td>
-    </tr>
-    <tr>
-      <th>PRESS</th>
-      <td>-0.216997</td>
-      <td>-0.200685</td>
-      <td>-0.352320</td>
-      <td>-0.016363</td>
-      <td>-0.094918</td>
-      <td>1.000000</td>
-      <td>-0.141142</td>
-      <td>-0.144661</td>
-      <td>-0.183571</td>
-      <td>-0.254121</td>
-      <td>-0.202180</td>
-      <td>0.086579</td>
-      <td>0.104803</td>
-      <td>0.107635</td>
-      <td>-0.429404</td>
-      <td>-0.020202</td>
-      <td>-0.032995</td>
-      <td>-0.027303</td>
-    </tr>
-    <tr>
-      <th>CCS811_VOCS</th>
-      <td>0.192807</td>
-      <td>0.784337</td>
-      <td>0.227877</td>
-      <td>-0.095234</td>
-      <td>0.436473</td>
-      <td>-0.141142</td>
-      <td>1.000000</td>
-      <td>0.935007</td>
-      <td>0.805563</td>
-      <td>0.277245</td>
-      <td>0.780386</td>
-      <td>-0.126319</td>
-      <td>-0.132555</td>
-      <td>-0.123778</td>
-      <td>0.099615</td>
-      <td>-0.494551</td>
-      <td>-0.463696</td>
-      <td>-0.479210</td>
-    </tr>
-    <tr>
-      <th>CCS811_ECO2</th>
-      <td>0.274876</td>
-      <td>0.865434</td>
-      <td>0.241680</td>
-      <td>-0.032832</td>
-      <td>0.501627</td>
-      <td>-0.144661</td>
-      <td>0.935007</td>
-      <td>1.000000</td>
-      <td>0.890838</td>
-      <td>0.364789</td>
-      <td>0.865041</td>
-      <td>-0.072257</td>
-      <td>-0.079218</td>
-      <td>-0.071717</td>
-      <td>0.075909</td>
-      <td>-0.609968</td>
-      <td>-0.564689</td>
-      <td>-0.587075</td>
-    </tr>
-    <tr>
-      <th>SCD30_CO2</th>
-      <td>0.361620</td>
-      <td>0.931950</td>
-      <td>0.173005</td>
-      <td>-0.217748</td>
-      <td>0.705279</td>
-      <td>-0.183571</td>
-      <td>0.805563</td>
-      <td>0.890838</td>
-      <td>1.000000</td>
-      <td>0.450857</td>
-      <td>0.921047</td>
-      <td>-0.207647</td>
-      <td>-0.252529</td>
-      <td>-0.258611</td>
-      <td>0.019399</td>
-      <td>-0.791315</td>
-      <td>-0.757746</td>
-      <td>-0.775459</td>
-    </tr>
-    <tr>
-      <th>SCD30_TEMP</th>
-      <td>0.982783</td>
-      <td>0.438683</td>
-      <td>-0.116293</td>
-      <td>-0.032856</td>
-      <td>0.344176</td>
-      <td>-0.254121</td>
-      <td>0.277245</td>
-      <td>0.364789</td>
-      <td>0.450857</td>
-      <td>1.000000</td>
-      <td>0.464199</td>
-      <td>0.075309</td>
-      <td>0.036651</td>
-      <td>0.027745</td>
-      <td>-0.242700</td>
-      <td>-0.187658</td>
-      <td>-0.147397</td>
-      <td>-0.166136</td>
-    </tr>
-    <tr>
-      <th>SCD30_HUM</th>
-      <td>0.380277</td>
-      <td>0.996366</td>
-      <td>0.118250</td>
-      <td>-0.213316</td>
-      <td>0.559487</td>
-      <td>-0.202180</td>
-      <td>0.780386</td>
-      <td>0.865041</td>
-      <td>0.921047</td>
-      <td>0.464199</td>
-      <td>1.000000</td>
-      <td>-0.132487</td>
-      <td>-0.155959</td>
-      <td>-0.154088</td>
-      <td>0.032091</td>
-      <td>-0.706477</td>
-      <td>-0.673590</td>
-      <td>-0.690716</td>
-    </tr>
-    <tr>
-      <th>PM_1</th>
-      <td>0.117268</td>
-      <td>-0.149658</td>
-      <td>-0.006917</td>
-      <td>0.399301</td>
-      <td>-0.225660</td>
-      <td>0.086579</td>
-      <td>-0.126319</td>
-      <td>-0.072257</td>
-      <td>-0.207647</td>
-      <td>0.075309</td>
-      <td>-0.132487</td>
-      <td>1.000000</td>
-      <td>0.971183</td>
-      <td>0.956436</td>
-      <td>0.067334</td>
-      <td>0.277480</td>
-      <td>0.308432</td>
-      <td>0.295414</td>
-    </tr>
-    <tr>
-      <th>PM_25</th>
-      <td>0.073169</td>
-      <td>-0.176525</td>
-      <td>0.006553</td>
-      <td>0.382452</td>
-      <td>-0.297031</td>
-      <td>0.104803</td>
-      <td>-0.132555</td>
-      <td>-0.079218</td>
-      <td>-0.252529</td>
-      <td>0.036651</td>
-      <td>-0.155959</td>
-      <td>0.971183</td>
-      <td>1.000000</td>
-      <td>0.996743</td>
-      <td>0.055430</td>
-      <td>0.340430</td>
-      <td>0.375051</td>
-      <td>0.360588</td>
-    </tr>
-    <tr>
-      <th>PM_10</th>
-      <td>0.062629</td>
-      <td>-0.175673</td>
-      <td>0.005445</td>
-      <td>0.381544</td>
-      <td>-0.311816</td>
-      <td>0.107635</td>
-      <td>-0.123778</td>
-      <td>-0.071717</td>
-      <td>-0.258611</td>
-      <td>0.027745</td>
-      <td>-0.154088</td>
-      <td>0.956436</td>
-      <td>0.996743</td>
-      <td>1.000000</td>
-      <td>0.053782</td>
-      <td>0.359778</td>
-      <td>0.396230</td>
-      <td>0.381006</td>
-    </tr>
-    <tr>
-      <th>day</th>
-      <td>-0.271903</td>
-      <td>0.042550</td>
-      <td>0.546151</td>
-      <td>0.143201</td>
-      <td>0.013444</td>
-      <td>-0.429404</td>
-      <td>0.099615</td>
-      <td>0.075909</td>
-      <td>0.019399</td>
-      <td>-0.242700</td>
-      <td>0.032091</td>
-      <td>0.067334</td>
-      <td>0.055430</td>
-      <td>0.053782</td>
-      <td>1.000000</td>
-      <td>-0.051734</td>
-      <td>-0.045458</td>
-      <td>-0.048453</td>
-    </tr>
-    <tr>
-      <th>M0_count</th>
-      <td>-0.109794</td>
-      <td>-0.735108</td>
-      <td>-0.116389</td>
-      <td>0.172480</td>
-      <td>-0.666472</td>
-      <td>-0.020202</td>
-      <td>-0.494551</td>
-      <td>-0.609968</td>
-      <td>-0.791315</td>
-      <td>-0.187658</td>
-      <td>-0.706477</td>
-      <td>0.277480</td>
-      <td>0.340430</td>
-      <td>0.359778</td>
-      <td>-0.051734</td>
-      <td>1.000000</td>
-      <td>0.986784</td>
-      <td>0.996022</td>
-    </tr>
-    <tr>
-      <th>M1_count</th>
-      <td>-0.075218</td>
-      <td>-0.703678</td>
-      <td>-0.082649</td>
-      <td>0.203348</td>
-      <td>-0.659078</td>
-      <td>-0.032995</td>
-      <td>-0.463696</td>
-      <td>-0.564689</td>
-      <td>-0.757746</td>
-      <td>-0.147397</td>
-      <td>-0.673590</td>
-      <td>0.308432</td>
-      <td>0.375051</td>
-      <td>0.396230</td>
-      <td>-0.045458</td>
-      <td>0.986784</td>
-      <td>1.000000</td>
-      <td>0.997298</td>
-    </tr>
-    <tr>
-      <th>M_count</th>
-      <td>-0.091142</td>
-      <td>-0.720243</td>
-      <td>-0.098218</td>
-      <td>0.190021</td>
-      <td>-0.664599</td>
-      <td>-0.027303</td>
-      <td>-0.479210</td>
-      <td>-0.587075</td>
-      <td>-0.775459</td>
-      <td>-0.166136</td>
-      <td>-0.690716</td>
-      <td>0.295414</td>
-      <td>0.360588</td>
-      <td>0.381006</td>
-      <td>-0.048453</td>
-      <td>0.996022</td>
-      <td>0.997298</td>
-      <td>1.000000</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+    <AxesSubplot: >
 
 
 
-Plot the time series on the same graph:
+
+    
+![png](README_files/README_7_1.png)
+    
+
+
+
+```python
+print(corr.M_count)
+```
+
+    TEMP          -0.091142
+    HUM           -0.720243
+    BATT          -0.098218
+    LIGHT          0.190021
+    NOISE_A       -0.664599
+    PRESS         -0.027303
+    CCS811_VOCS   -0.479210
+    CCS811_ECO2   -0.587075
+    SCD30_CO2     -0.775459
+    SCD30_TEMP    -0.166136
+    SCD30_HUM     -0.690716
+    PM_1           0.295414
+    PM_25          0.360588
+    PM_10          0.381006
+    day           -0.048453
+    M0_count       0.996022
+    M1_count       0.997298
+    M_count        1.000000
+    Name: M_count, dtype: float64
+
+
+Let's plot PM 2.5 (because it's worse than PM 10 for your health) and motorway traffic as time series on the same graph:
 
 
 ```python
@@ -534,11 +152,11 @@ ax1.legend().remove()
 
 
     
-![png](README_files/README_9_0.png)
+![png](README_files/README_10_0.png)
     
 
 
-And scatter PM 2.5 against motorway traffic flow:
+And scatter PM 2.5 against motorway traffic flow to show the correlation:
 
 
 ```python
@@ -554,7 +172,7 @@ df.plot.scatter(x="M_count",y="PM_25", ylabel="PM 2.5 (ppm)",xlabel="Motorway tr
 
 
     
-![png](README_files/README_11_1.png)
+![png](README_files/README_12_1.png)
     
 
 
@@ -566,5 +184,5 @@ meanval = df["PM_25"].mean() * 1000
 print(f"Average PM 2.5 is {np.rint(meanval)} ug/m3. WHO guidelines say aim for annual average of 5 ug/m3")
 ```
 
-    Average PM 2.5 is 3879.0 ug/m3. WHO guidelines say aim for average of 5 ug/m3
+    Average PM 2.5 is 3879.0 ug/m3. WHO guidelines say aim for annual average of 5 ug/m3
 
