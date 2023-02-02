@@ -22,16 +22,25 @@ traffic_path = constants.TRAFFIC_PATH / (location + "_traffic.csv")
 df2 = pd.read_csv(traffic_path,index_col=0)
 
 data = pd.concat([df,df2],axis=1)
+data["M_count"] = data["M0_count"] + data["M1_count"]
 
 fig,ax = plt.subplots()
-#data.plot(y="SCD30_CO2",ax=ax, style="r-")
-data.plot(y="PM_25",ax=ax, style="r-")
+data.plot(y="M_count",ax=ax,style="k-")
+ax.set_xlabel("Hour of week")
+ax.set_ylabel("Motorway traffic flow (vehicles)")
 ax1=ax.twinx()
-data.plot(y="M0_count",ax=ax1,style="k-")
-
+data.plot(y="PM_25",ax=ax1, style="r-")
+ax1.set_ylabel("PM 2.5 (ppm)")
+ax1.yaxis.label.set_color("red")
+ax1.tick_params(axis='y',colors="red")
+ax.legend().remove()
+ax1.legend().remove()
 
 # let's scatter
-data.plot.scatter(x="M0_count",y="PM_25")
+data.plot.scatter(x="M_count",y="PM_25", ylabel="PM 2.5 (ppm)",xlabel="Motorway traffic flow (vehicles)")
+
+meanval = data["PM_25"].mean() * 1000
+print(f"Average PM 2.5 is {np.rint(meanval)} ug/m3. WHO guidelines say aim for average of 5 ug/m3")
 
 data.corr()
 # %%

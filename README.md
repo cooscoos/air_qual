@@ -15,3 +15,6 @@ Note: Times may be 1 hour off due to time diff.
 ## Outdoor Air quality
 
 Todo, get from BEACONN
+
+WHO limits suggest 5 microns/m3 = 5e-3 ppm
+https://apps.who.int/iris/bitstream/handle/10665/345329/9789240034228-eng.pdf
