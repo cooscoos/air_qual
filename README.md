@@ -3,10 +3,10 @@ This repo does blah.
 
 ## Indoor Air quality 
 
-Location names match traffic flow data
-- 7a41
-- 1b14
-- 7a41_remote: approx 1km away from location 7a41
+Geographical location codes names match traffic flow data
+- 7a41 (A closer but no data, B and C are 1km away)
+- 1b14 (A and B in same home)
+
 
 Locations contain subfolders A and B if they have more than one monitoring location in a single indoor location.
 

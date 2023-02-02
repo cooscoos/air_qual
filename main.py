@@ -1,42 +1,37 @@
 #%%
+from lib import airqual_read
 from lib import constants
 import pandas as pd
-import re
+import numpy as np
+from matplotlib import pyplot as plt
 # First let's read in the air quality data, then downsample it to 1 hour non-overlapping bins just like the traffic data
 
 #location = "7a41"
 location = "1b14"
 
-pathy = constants.AIR_PATH / "indoor" / location
+lag = 1
 
-#start_date = "22-10-01"
-#end_date = "22-10-26"
-
-for sublocation in pathy.glob('*'):
-    df = pd.DataFrame()
-    # Each directory is a room
-    print(sublocation)
-    #read_in = False
-
-    for file in sublocation.glob('*'):
-
-#        if re.search(start_date,file.as_posix):
-#            read_in = True
-#        elif re.search(end_date,file.as_posix):
-#            read_in = False
-
-#        if read_in:        
-            print(file)
-            tempo = pd.read_csv(file,skiprows=range(1,4)) # skip header and first time-point (always garbage)
-            # remove timezone info, could be key to getting UK time later
-            tempo.set_index(pd.to_datetime(tempo["TIME"]).dt.tz_convert(None),inplace=True)
-            tempo.drop(["TIME"],axis=1,inplace=True) # drop the additional time column
-            df = pd.concat([df,tempo])        
-        
-    df.sort_index()
-
-    df.plot(y="SCD30_CO2")  
-# First job is to dir in here and stitch the data
+df_list = airqual_read.hourly_airqual(location,lag)
 
 
+df = df_list[1]
+
+# Read in traffic flow data as a df
+traffic_path = constants.TRAFFIC_PATH / (location + "_traffic.csv")
+
+df2 = pd.read_csv(traffic_path,index_col=0)
+
+data = pd.concat([df,df2],axis=1)
+
+fig,ax = plt.subplots()
+#data.plot(y="SCD30_CO2",ax=ax, style="r-")
+data.plot(y="PM_25",ax=ax, style="r-")
+ax1=ax.twinx()
+data.plot(y="M0_count",ax=ax1,style="k-")
+
+
+# let's scatter
+data.plot.scatter(x="M0_count",y="PM_25")
+
+data.corr()
 # %%
