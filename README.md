@@ -85,7 +85,7 @@ We'll approach this naively and try and see which variables correlate strongly w
 
 
 ```python
-df.corr()
+print(df.corr())
 ```
 
 
