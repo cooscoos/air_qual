@@ -1,3 +1,5 @@
+# Air quality vs motorway traffic
+
 Let's look at relationship between PM2.5 and traffic flow. The data are real, but the location "1b14" is undisclosed.
 
 
@@ -94,13 +96,6 @@ sns.heatmap(corr, cmap="magma",annot=False)
 ```
 
 
-
-
-    <AxesSubplot: >
-
-
-
-
     
 ![png](README_files/README_7_1.png)
     
@@ -185,4 +180,8 @@ print(f"Average PM 2.5 is {np.rint(meanval)} ug/m3. WHO guidelines say aim for a
 ```
 
     Average PM 2.5 is 3879.0 ug/m3. WHO guidelines say aim for annual average of 5 ug/m3
+
+
+Looks like it's time to buy an air purifier.
+
 
