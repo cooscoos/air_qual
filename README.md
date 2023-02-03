@@ -15,7 +15,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
 
+# Several air quality sensors are placed at location 1b14, pick out sensor 0.
 location = "1b14"
+sensor = 0
 ```
 
 The traffic data that we have is 1-hourly aggregated data.
@@ -24,12 +26,8 @@ To match this, we'll read in the air quality data, and then downsample it to a 1
 
 
 ```python
-# Several air quality sensors are placed at this location.
-# We retrieve a list of dataframes.
-df_list = airqual_read.hourly_airqual(location)
-
-# Let's pick out the second sensor at this location
-df = df_list[1]
+# Get the hourly averaged air quality df
+df = airqual_read.hourly_airqual(location,sensor)
 
 # Read in the traffic flow data for this location and append to air qual dataframe
 traffic_df = pd.read_csv(constants.TRAFFIC_PATH / (location + "_traffic.csv"),index_col=0)
@@ -72,20 +70,20 @@ print(df)
     166   693.328691  1714.345404  1306.637883   19.508969  64.917967  0.295775   
     167  1184.711297  1879.288703  1575.991632   19.630167  64.366904  0.000000   
     
-            PM_25     PM_10  day  M0_count  M1_count  M_count  
-    0    0.000000  0.000000  0.0     198.0     253.0    451.0  
-    1    0.000000  0.000000  0.0     116.0     158.0    274.0  
-    2    0.000000  0.069444  0.0     109.0     120.0    229.0  
-    3    0.000000  0.027778  0.0     141.0     120.0    261.0  
-    4    0.000000  0.000000  0.0     247.0     187.0    434.0  
-    ..        ...       ...  ...       ...       ...      ...  
-    163  0.513889  0.805556  6.0    1285.0    1450.0   2735.0  
-    164  1.478873  2.154930  6.0     980.0    1102.0   2082.0  
-    165  2.111111  2.930556  6.0     718.0     728.0   1446.0  
-    166  2.056338  3.070423  6.0     503.0     520.0   1023.0  
-    167  0.000000  0.000000  6.0     315.0     331.0    646.0  
+            PM_25     PM_10  day  M0_count  M1_count  
+    0    0.000000  0.000000  0.0     198.0     253.0  
+    1    0.000000  0.000000  0.0     116.0     158.0  
+    2    0.000000  0.069444  0.0     109.0     120.0  
+    3    0.000000  0.027778  0.0     141.0     120.0  
+    4    0.000000  0.000000  0.0     247.0     187.0  
+    ..        ...       ...  ...       ...       ...  
+    163  0.513889  0.805556  6.0    1285.0    1450.0  
+    164  1.478873  2.154930  6.0     980.0    1102.0  
+    165  2.111111  2.930556  6.0     718.0     728.0  
+    166  2.056338  3.070423  6.0     503.0     520.0  
+    167  0.000000  0.000000  6.0     315.0     331.0  
     
-    [168 rows x 18 columns]
+    [168 rows x 17 columns]
 
 
 We'll approach this naively and try and see which variables correlate strongly with each other. Doing this shows that:
@@ -117,25 +115,27 @@ sns.heatmap(corr, cmap="magma",annot=False)
 print(corr.M_count)
 ```
 
-    TEMP          -0.091127
-    HUM           -0.720241
-    BATT          -0.098234
-    LIGHT          0.190017
-    NOISE_A       -0.664586
-    PRESS         -0.027323
-    CCS811_VOCS   -0.479208
-    CCS811_ECO2   -0.587075
-    SCD30_CO2     -0.775458
-    SCD30_TEMP    -0.166123
-    SCD30_HUM     -0.690713
-    PM_1           0.295394
-    PM_25          0.360571
-    PM_10          0.380991
-    day           -0.048439
-    M0_count       0.996021
-    M1_count       0.997297
-    M_count        1.000000
-    Name: M_count, dtype: float64
+
+    ---------------------------------------------------------------------------
+
+    AttributeError                            Traceback (most recent call last)
+
+    Cell In[5], line 1
+    ----> 1 print(corr.M_count)
+
+
+    File ~/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py:5902, in NDFrame.__getattr__(self, name)
+       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5894'>5895</a> if (
+       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5895'>5896</a>     name not in self._internal_names_set
+       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5896'>5897</a>     and name not in self._metadata
+       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5897'>5898</a>     and name not in self._accessors
+       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5898'>5899</a>     and self._info_axis._can_hold_identifiers_and_holds_name(name)
+       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5899'>5900</a> ):
+       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5900'>5901</a>     return self[name]
+    -> <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5901'>5902</a> return object.__getattribute__(self, name)
+
+
+    AttributeError: 'DataFrame' object has no attribute 'M_count'
 
 
 Let's plot PM 2.5 (because it's worse than PM 10 for your health) and motorway traffic as time series on the same graph:

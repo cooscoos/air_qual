@@ -13,10 +13,10 @@ import seaborn as sns
 location = "1b14"
 
 # Read in air quality data, and downsample it to 1-hour non-overlapping averages to match traffic data.
-df_list = airqual_read.hourly_airqual(location)
+df = airqual_read.hourly_airqual(location,sensor=0)
 
 # Pick out the second sensor at the defined location.
-df = df_list[1]
+#df = df_list[1]
 
 # Read in traffic flow data for this location and append to air qual data
 traffic_df = pd.read_csv(constants.TRAFFIC_PATH / (location + "_traffic.csv"),index_col=0)
