@@ -1,18 +1,23 @@
 # Air quality vs motorway traffic
 
-Let's look at relationship between PM2.5 and traffic flow. Here:
-- indoor air quality data are real and unmasked;
-- traffic data and outdoor air quality data are masked, and the location "1b14" is undisclosed.
+Let's look at relationships between air quality and local motorway traffic.
 
-The masking method used preserves correlations between data sets, but does not preserve absolute magnitudes.
+The datasets in ./Data include:
+- **indoor air quality data**: these are real and unmasked;
+- **traffic data**: these are masked, and show "hour of week" vs traffic flow (data collected over one week at a time similar to indoor air quality monitoring);
+- **outdoor air quality**: also masked, and show "hour of week" vs average outdoor CO2 and particulate matter (the averages were taken over a 6 month period that did not overlap with indoor air quality monitoring).
+
+The data masking method used preserves correlations between data sets, but does not preserve absolute magnitudes.
 
 
 ```python
 from lib import airqual_read
+from lib import plotter
 from lib import constants
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
+import statsmodels.api as sm
 import seaborn as sns
 
 # Several air quality sensors are placed at location 1b14, pick out sensor 0.
@@ -22,16 +27,18 @@ sensor = 0
 
 The traffic data that we have is 1-hourly aggregated data.
 
-To match this, we'll read in the air quality data, and then downsample it to a 1-hourly average (non-overlapping windows).
+We want indoor air quality data to match this, so we'll downsample it to a 1-hourly average (non-overlapping windows).
 
 
 ```python
-# Get the hourly averaged air quality df
+# Get the hourly averaged indoor air quality df
 df = airqual_read.hourly_airqual(location,sensor)
 
-# Read in the traffic flow data for this location and append to air qual dataframe
+# Read in the traffic flow data and outdoor air quality for this location and append to indoor air qual dataframe
 traffic_df = pd.read_csv(constants.TRAFFIC_PATH / (location + "_traffic.csv"),index_col=0)
-df = pd.concat([df,traffic_df],axis=1)
+outdoor_df = pd.read_csv(constants.AIR_PATH / "outdoor" / (location + "_outair.csv"),index_col=0)
+
+df = pd.concat([df,traffic_df,outdoor_df],axis=1)
 
 # There are two motorways near this location. We'll aggregate the traffic flows.
 df["M_count"] = df["M0_count"] + df["M1_count"]
@@ -70,26 +77,23 @@ print(df)
     166   693.328691  1714.345404  1306.637883   19.508969  64.917967  0.295775   
     167  1184.711297  1879.288703  1575.991632   19.630167  64.366904  0.000000   
     
-            PM_25     PM_10  day  M0_count  M1_count  
-    0    0.000000  0.000000  0.0     198.0     253.0  
-    1    0.000000  0.000000  0.0     116.0     158.0  
-    2    0.000000  0.069444  0.0     109.0     120.0  
-    3    0.000000  0.027778  0.0     141.0     120.0  
-    4    0.000000  0.000000  0.0     247.0     187.0  
-    ..        ...       ...  ...       ...       ...  
-    163  0.513889  0.805556  6.0    1285.0    1450.0  
-    164  1.478873  2.154930  6.0     980.0    1102.0  
-    165  2.111111  2.930556  6.0     718.0     728.0  
-    166  2.056338  3.070423  6.0     503.0     520.0  
-    167  0.000000  0.000000  6.0     315.0     331.0  
+            PM_25     PM_10  day  M0_count  M1_count  out_CO2    out_PM  M_count  
+    0    0.000000  0.000000  0.0     198.0     253.0    411.3  0.007045    451.0  
+    1    0.000000  0.000000  0.0     116.0     158.0    410.4  0.006935    274.0  
+    2    0.000000  0.069444  0.0     109.0     120.0    410.9  0.006663    229.0  
+    3    0.000000  0.027778  0.0     141.0     120.0    410.9  0.006470    261.0  
+    4    0.000000  0.000000  0.0     247.0     187.0    411.9  0.006612    434.0  
+    ..        ...       ...  ...       ...       ...      ...       ...      ...  
+    163  0.513889  0.805556  6.0    1285.0    1450.0    424.0  0.007893   2735.0  
+    164  1.478873  2.154930  6.0     980.0    1102.0    419.5  0.007939   2082.0  
+    165  2.111111  2.930556  6.0     718.0     728.0    415.7  0.007906   1446.0  
+    166  2.056338  3.070423  6.0     503.0     520.0    413.5  0.008137   1023.0  
+    167  0.000000  0.000000  6.0     315.0     331.0    412.2  0.007331    646.0  
     
-    [168 rows x 17 columns]
+    [168 rows x 20 columns]
 
 
-We'll approach this naively and try and see which variables correlate strongly with each other. Doing this shows that:
-- particulate matter (PM_1, P_25, PM_10) shows reasonably hot colours against motorway traffic in a correlation heat map;
-- of all indoor environmental quality variables, PM_25 (PM 2.5) and PM_10 have the strongest correlation with motorway traffic;
-- the correlation coefficient is weak/moderate with a correlation of about 0.4.
+We'll approach this naively and try and see which variables correlate strongly with each other. Here is a correlation heatmap:
 
 
 ```python
@@ -110,79 +114,202 @@ sns.heatmap(corr, cmap="magma",annot=False)
     
 
 
+The heatmap (and the correlation variables below) show that:
+- outdoor CO2 (out_CO2) correlates strongly with motorway traffic (=0.85), and correlates well with outdoor PM (=0.6);
+- indoor particulate matter (PM_1, P_25, PM_10) show weak correlations (0.4) with motorway traffic;
+- of all indoor environmental quality variables, particulate matter has the strongest correlation with motorway traffic.
+
 
 ```python
-print(corr.M_count)
+print(f"=Correlation of variables with traffic count=\n{corr.M_count}")
+
+#print(f"=Correlation of variables with traffic count=\n{corr.PM_25}")
+```
+
+    =Correlation of variables with traffic count=
+    TEMP          -0.091127
+    HUM           -0.720241
+    BATT          -0.098234
+    LIGHT          0.190017
+    NOISE_A       -0.664586
+    PRESS         -0.027323
+    CCS811_VOCS   -0.479208
+    CCS811_ECO2   -0.587075
+    SCD30_CO2     -0.775458
+    SCD30_TEMP    -0.166123
+    SCD30_HUM     -0.690713
+    PM_1           0.295394
+    PM_25          0.360571
+    PM_10          0.380991
+    day           -0.048439
+    M0_count       0.996021
+    M1_count       0.997297
+    out_CO2        0.846241
+    out_PM         0.614644
+    M_count        1.000000
+    Name: M_count, dtype: float64
+
+
+Let's plot some time series. We'll always plot motorway traffic over the week in black, and we'll overlay:
+- indoor PM 2.5 (red);
+- outdoor PM (green);
+- outdoor CO2 (blue).
+
+
+```python
+plotter.overlay_plot(df,"M_count","Motorway traffic (vehicles)","PM_25","Indoor PM2.5 (ppm)",['k','r'])
+plotter.overlay_plot(df,"M_count","Motorway traffic (vehicles)","out_PM","Outdoor PM (ppm)",['k','g'])
+plotter.overlay_plot(df,"M_count","Motorway traffic (vehicles)","out_CO2","Outdoor CO2 (ppm)",['k','b'])
 ```
 
 
-    ---------------------------------------------------------------------------
-
-    AttributeError                            Traceback (most recent call last)
-
-    Cell In[5], line 1
-    ----> 1 print(corr.M_count)
+    
+![png](README_files/README_11_0.png)
+    
 
 
-    File ~/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py:5902, in NDFrame.__getattr__(self, name)
-       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5894'>5895</a> if (
-       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5895'>5896</a>     name not in self._internal_names_set
-       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5896'>5897</a>     and name not in self._metadata
-       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5897'>5898</a>     and name not in self._accessors
-       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5898'>5899</a>     and self._info_axis._can_hold_identifiers_and_holds_name(name)
-       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5899'>5900</a> ):
-       <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5900'>5901</a>     return self[name]
-    -> <a href='file:///home/coosy/Documents/Coding/Python/venvs/air_qual/lib/python3.10/site-packages/pandas/core/generic.py?line=5901'>5902</a> return object.__getattribute__(self, name)
+
+    
+![png](README_files/README_11_1.png)
+    
 
 
-    AttributeError: 'DataFrame' object has no attribute 'M_count'
+
+    
+![png](README_files/README_11_2.png)
+    
 
 
-Let's plot PM 2.5 (because it's worse than PM 10 for your health) and motorway traffic as time series on the same graph:
+These show correlations, but scatter plots might do it better. If we scatter indoor PM 2.5 vs traffic, we see the weak correlation.
 
 
 ```python
-# Let's plot the time series
+sns.regplot(df,x="M_count",y="PM_25",color="black")
+```
+
+
+
+
+    <AxesSubplot: xlabel='M_count', ylabel='PM_25'>
+
+
+
+
+    
+![png](README_files/README_13_1.png)
+    
+
+
+Outdoor PM vs traffic, and outdoor CO2 vs traffic show much stronger correlations.
+
+
+```python
+sns.regplot(df,x="M_count",y="out_PM",color="black")
+```
+
+
+
+
+    <AxesSubplot: xlabel='M_count', ylabel='out_PM'>
+
+
+
+
+    
+![png](README_files/README_15_1.png)
+    
+
+
+
+```python
+sns.regplot(df,x="M_count",y="out_CO2",color="black")
+```
+
+
+
+
+    <AxesSubplot: xlabel='M_count', ylabel='out_CO2'>
+
+
+
+
+    
+![png](README_files/README_16_1.png)
+    
+
+
+Indoor PM 2.5 vs outdoor PM: here we have very weak / no correlation. 
+
+
+```python
+sns.regplot(df,x="out_PM",y="PM_25",color="red")
+```
+
+
+
+
+    <AxesSubplot: xlabel='out_PM', ylabel='PM_25'>
+
+
+
+
+    
+![png](README_files/README_18_1.png)
+    
+
+
+Could it be that outdoor and indoor PM are just out of phase (e.g. it takes time for particulate matter to move indoors)?
+
+We can check this by cross-correlating the outdoor and indoor PM values with different amounts of lag applied to one time series.
+
+
+```python
+corr_df = pd.Series(sm.tsa.ccf(df["PM_25"],df["out_PM"],adjusted=False))
 fig,ax = plt.subplots()
-df.plot(y="M_count",ax=ax,style="k-")
-ax.set_xlabel("Hour of week")
-ax.set_ylabel("Motorway traffic flow (vehicles)")
-ax1=ax.twinx()
-df.plot(y="PM_25",ax=ax1, style="r-")
-ax1.set_ylabel("PM 2.5 (ppm)")
-ax1.yaxis.label.set_color("red")
-ax1.tick_params(axis='y',colors="red")
-ax.legend().remove()
-ax1.legend().remove()
+corr_df.plot()
+plt.xticks([0,24,48,48+24,48+48,72+24,72+48,72+72,144+24])
+ax.set_xlabel("Lag (hours)")
+ax.set_ylabel("Crosscorr(Outdoor PM, Indoor PM)")
 ```
 
 
+
+
+    Text(0, 0.5, 'Crosscorr(Outdoor PM, Indoor PM)')
+
+
+
+
     
-![png](README_files/README_10_0.png)
+![png](README_files/README_20_1.png)
     
 
 
-And scatter PM 2.5 against motorway traffic flow to show the correlation:
+The plot is daily cyclic, showing maximum correlation values of 0.2. There might be some link here. Getting outdoor air quality data over the same period as indoor air quality data could help in future work.
+
+Some final things that are just interesting. Indoor CO2 vs outdoor CO2 shows a strong negative correlation. The reason for this could be because people tend to stay indoors at night when traffic is low.
 
 
 ```python
-df.plot.scatter(x="M_count",y="PM_25", ylabel="PM 2.5 (ppm)",xlabel="Motorway traffic flow (vehicles)")
+sns.regplot(df,x="out_CO2",y="SCD30_CO2",color="blue")
 ```
 
 
 
 
-    <AxesSubplot: xlabel='Motorway traffic flow (vehicles)', ylabel='PM 2.5 (ppm)'>
+    <AxesSubplot: xlabel='out_CO2', ylabel='SCD30_CO2'>
 
 
 
 
     
-![png](README_files/README_12_1.png)
+![png](README_files/README_22_1.png)
     
 
 
-Finally, calculate the average PM 2.5 levels and compare them against WHO guidelines.
+As the indoor air quality is unmasked, we can use it to calculate the average absolute indoor PM 2.5 levels and compare them against WHO guidelines.
+
+Looks like this location could do with an HEPA filter.
 
 
 ```python

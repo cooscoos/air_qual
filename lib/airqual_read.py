@@ -62,3 +62,4 @@ def hourly_airqual(location: str, sensor: int = 0, lag: int = -1) -> pd.DataFram
             stitched_df.reset_index(inplace=True,drop=True)
         
     return stitched_df
+
