@@ -122,8 +122,6 @@ The heatmap (and the correlation variables below) show that:
 
 ```python
 print(f"=Correlation of variables with traffic count=\n{corr.M_count}")
-
-#print(f"=Correlation of variables with traffic count=\n{corr.PM_25}")
 ```
 
     =Correlation of variables with traffic count=
