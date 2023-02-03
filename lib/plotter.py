@@ -1,10 +1,31 @@
+"""Module for making plots"""
 
 import pandas as pd
 from matplotlib import pyplot as plt
 
-
 def overlay_plot(df: pd.DataFrame, var1: str, var1_name: str, var2: str, var2_name: str, colors: list[str,str]):
-    # Let's plot time series
+    """Create overlay time series plots from pandas dataframes
+    
+    Parameters
+    -------
+    df: pd.DataFrame
+        Input dataframe with index as datetime
+
+    var1, var2: str
+        The two dataframe column labels to plot
+
+    var1_name, var2_name: str
+        Labels for these variables in the plot
+
+
+    colors: list[str, str]
+        Colors to use in the plot, e.g. ['r','k'] would plot var1 in red and var2 in black
+
+    Outputs
+    -------
+    Time series plot with var1 and var2 overlayed.
+    """
+
     _,ax = plt.subplots()
     
     # first plot
