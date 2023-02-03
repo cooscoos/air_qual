@@ -1,6 +1,10 @@
 # Air quality vs motorway traffic
 
-Let's look at relationship between PM2.5 and traffic flow. The data are real, but the location "1b14" is undisclosed.
+Let's look at relationship between PM2.5 and traffic flow. Here:
+- indoor air quality data are real and unmasked;
+- traffic data and outdoor air quality data are masked, and the location "1b14" is undisclosed.
+
+The masking method used preserves correlations between data sets, but does not preserve absolute magnitudes.
 
 
 ```python
@@ -16,7 +20,7 @@ location = "1b14"
 
 The traffic data that we have is 1-hourly aggregated data.
 
-We'll read in the air quality data, and then downsample so that it is also 1-hourly average (non-overlapping window).
+To match this, we'll read in the air quality data, and then downsample it to a 1-hourly average (non-overlapping windows).
 
 
 ```python
@@ -69,24 +73,24 @@ print(df)
     167  1184.711297  1879.288703  1575.991632   19.630167  64.366904  0.000000   
     
             PM_25     PM_10  day  M0_count  M1_count  M_count  
-    0    0.000000  0.000000  0.0       330       422      752  
-    1    0.000000  0.000000  0.0       193       263      456  
-    2    0.000000  0.069444  0.0       182       200      382  
-    3    0.000000  0.027778  0.0       235       200      435  
-    4    0.000000  0.000000  0.0       411       312      723  
+    0    0.000000  0.000000  0.0     198.0     253.0    451.0  
+    1    0.000000  0.000000  0.0     116.0     158.0    274.0  
+    2    0.000000  0.069444  0.0     109.0     120.0    229.0  
+    3    0.000000  0.027778  0.0     141.0     120.0    261.0  
+    4    0.000000  0.000000  0.0     247.0     187.0    434.0  
     ..        ...       ...  ...       ...       ...      ...  
-    163  0.513889  0.805556  6.0      2141      2416     4557  
-    164  1.478873  2.154930  6.0      1634      1837     3471  
-    165  2.111111  2.930556  6.0      1196      1214     2410  
-    166  2.056338  3.070423  6.0       839       866     1705  
-    167  0.000000  0.000000  6.0       525       551     1076  
+    163  0.513889  0.805556  6.0    1285.0    1450.0   2735.0  
+    164  1.478873  2.154930  6.0     980.0    1102.0   2082.0  
+    165  2.111111  2.930556  6.0     718.0     728.0   1446.0  
+    166  2.056338  3.070423  6.0     503.0     520.0   1023.0  
+    167  0.000000  0.000000  6.0     315.0     331.0    646.0  
     
     [168 rows x 18 columns]
 
 
 We'll approach this naively and try and see which variables correlate strongly with each other. Doing this shows that:
 - particulate matter (PM_1, P_25, PM_10) shows reasonably hot colours against motorway traffic in a correlation heat map;
-- of all indoor environmental quality variables, PM_25 and PM_10 (PM 2.5) have the strongest correlation with motorway traffic;
+- of all indoor environmental quality variables, PM_25 (PM 2.5) and PM_10 have the strongest correlation with motorway traffic;
 - the correlation coefficient is weak/moderate with a correlation of about 0.4.
 
 
@@ -94,6 +98,13 @@ We'll approach this naively and try and see which variables correlate strongly w
 corr = df.corr()
 sns.heatmap(corr, cmap="magma",annot=False)
 ```
+
+
+
+
+    <AxesSubplot: >
+
+
 
 
     
@@ -106,23 +117,23 @@ sns.heatmap(corr, cmap="magma",annot=False)
 print(corr.M_count)
 ```
 
-    TEMP          -0.091142
-    HUM           -0.720243
-    BATT          -0.098218
-    LIGHT          0.190021
-    NOISE_A       -0.664599
-    PRESS         -0.027303
-    CCS811_VOCS   -0.479210
+    TEMP          -0.091127
+    HUM           -0.720241
+    BATT          -0.098234
+    LIGHT          0.190017
+    NOISE_A       -0.664586
+    PRESS         -0.027323
+    CCS811_VOCS   -0.479208
     CCS811_ECO2   -0.587075
-    SCD30_CO2     -0.775459
-    SCD30_TEMP    -0.166136
-    SCD30_HUM     -0.690716
-    PM_1           0.295414
-    PM_25          0.360588
-    PM_10          0.381006
-    day           -0.048453
-    M0_count       0.996022
-    M1_count       0.997298
+    SCD30_CO2     -0.775458
+    SCD30_TEMP    -0.166123
+    SCD30_HUM     -0.690713
+    PM_1           0.295394
+    PM_25          0.360571
+    PM_10          0.380991
+    day           -0.048439
+    M0_count       0.996021
+    M1_count       0.997297
     M_count        1.000000
     Name: M_count, dtype: float64
 
@@ -180,8 +191,4 @@ print(f"Average PM 2.5 is {np.rint(meanval)} ug/m3. WHO guidelines say aim for a
 ```
 
     Average PM 2.5 is 3879.0 ug/m3. WHO guidelines say aim for annual average of 5 ug/m3
-
-
-Looks like it's time to buy an air purifier.
-
 
