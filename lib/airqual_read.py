@@ -22,7 +22,7 @@ def hourly_airqual(location: str, sensor: int = 0, lag: int = -1) -> pd.DataFram
 
     Returns
     -------
-    stitched_df: list[pd.DataFrame]
+    stitched_df: pd.DataFrame
         Dataframe of hourly averaged air quality readings for given sensor at location.
     """
     
